@@ -96,7 +96,7 @@
     (function () {
         var startScript = $("[sugar-main]");
         if(0 < startScript.length) {
-            var namespace = namespace.attr("sugar-main");
+            var namespace = startScript.attr("sugar-main");
             sugar.addModuleToDom(sugar.convertNamespaceToFilename(namespace)))   
         }
     })();
