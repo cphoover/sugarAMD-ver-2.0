@@ -1,8 +1,7 @@
-sugar(function(){
+sugar(['SUGAR.animal.Dog'], function(){
 
-    return {
-        'asdf' : 1,
-        'blah' : 2
-    };
 
+    var roofus = new SUGAR.animal.Dog();
+    roofus.bark();
+    
 });
