@@ -1,3 +1,4 @@
+console.log('date')
 sugar(function(){
 
     function Blah(){
@@ -5,3 +6,7 @@ sugar(function(){
     return Blah;
 
 });
+
+console.log(sugar.getCurrentScript());
+
+console.log('date')

@@ -9,7 +9,6 @@ document.__defineGetter__&&document.__defineGetter__("currentScript",d)}();
     "use strict";
     function sugar(_dependencies, _callback) {
 
-
         var currentScript     = sugar.getCurrentScript();
 
         var currentScriptSrc  = currentScript.getAttribute('src');
@@ -19,39 +18,54 @@ document.__defineGetter__&&document.__defineGetter__("currentScript",d)}();
         var callback          = ("function" === typeof _callback  || "object" === typeof _callback)   ? _callback     : _dependencies;
         var dependencies      = _dependencies instanceof Array ? _dependencies : null;            
 
-
-
         if (null === dependencies  || dependencies.length === 0){
                 sugar.moduleDone($currentScript, namespaceString, callback);
         } else if (dependencies.length > 0) {
 
-            
-            var dependencyMap = {};
-            dependencies.forEach(function (_dependency) {
+                var dependencyMap = {};
 
-                dependencyMap[_dependency] = false;
 
-                var dependencyFileName = sugar.convertNamespaceToFilename(_dependency);
-                // if already added to screen continue in loop...
-                if ($('[src="' + dependencyFileName + '"]').length > 0) {
-                    return false;
-                }
-
-                var script = sugar.addModuleToDom(dependencyFileName);
-
-                $(script).on("dependenciesLoaded", function () {
-                    var loaded = sugar.convertFilenameToNamespace(this.getAttribute('src'));
-                    dependencyMap[loaded] = true;
-                    if(sugar.checkDone(dependencyMap)) {
-                        sugar.moduleDone($currentScript, namespaceString, callback);
-                    }
+                dependencies.forEach(function (_dependency) {
+                    dependencyMap[_dependency] = false;
                 });
-            });
+
+                //synchronous loop only add dependency to dom after load event of script
+                sugar.handleDependency(namespaceString, callback, $currentScript, dependencies, dependencyMap, 0);
         }
+
 
     }
 
     sugar.base = "/JS/";
+
+    sugar.handleDependency = function(_namespaceString, _callback, _$currentScript, _dependencies, _dependencyMap,  _index){
+
+            if(_index >= _dependencies.length){
+                return false;
+            }
+            var dependency = _dependencies[_index];
+            var dependencyFileName = sugar.convertNamespaceToFilename(dependency);
+            // if already added to screen continue in loop...
+            if ($('[src="' + dependencyFileName + '"]').length > 0) {
+                sugar.handleDependency(_namespaceString, _callback, _$currentScript, _dependencies, _dependencyMap, (_index+1));
+            }
+
+            var script = sugar.addModuleToDom(dependencyFileName);
+
+            $(script).on('load', function(){
+                 sugar.handleDependency(_namespaceString, _callback, _$currentScript, _dependencies, _dependencyMap,  (_index + 1));
+            });
+
+            $(script).on("dependenciesLoaded", function () {
+                var loaded = sugar.convertFilenameToNamespace(this.getAttribute('src'));
+                _dependencyMap[loaded] = true;
+                if(sugar.checkDone(_dependencyMap)) {
+                    sugar.moduleDone(_$currentScript, _namespaceString, _callback);
+                }
+            });
+
+
+    };
 
     sugar.moduleContainer = (function () {
         var moduleContainer = document.getElementById("sugar-module-container");
@@ -67,7 +81,10 @@ document.__defineGetter__&&document.__defineGetter__("currentScript",d)}();
     sugar.addModuleToDom = function(_src){
         var script = document.createElement("script");
         script.setAttribute('src',  _src);
-        sugar.moduleContainer.appendChild(script);
+        setTimeout(function(){
+        document.body.appendChild(script);
+        }, 100);
+//      sugar.moduleContainer.appendChild(script);
         return script;
     };
 
@@ -84,7 +101,13 @@ document.__defineGetter__&&document.__defineGetter__("currentScript",d)}();
             _$currentScript.trigger("dependenciesLoaded");
     };
 
-    sugar.getCurrentScript = function () {
+    sugar.getCurrentScript = function () {  
+
+        var scripts = document.getElementsByTagName('script');
+        var index = scripts.length - 1;
+        return scripts[index];
+
+        return sugar.moduleContainer.lastChild;
         return document.currentScript;
     };
 

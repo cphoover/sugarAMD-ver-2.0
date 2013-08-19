@@ -1,3 +1,5 @@
+console.log('animal');
+
 sugar(function(){
 
     function Animal(){
@@ -11,3 +13,7 @@ sugar(function(){
     return Animal;
  
 });
+
+console.log(sugar.getCurrentScript());
+
+console.log('animal');

@@ -1,3 +1,6 @@
+console.log('dog')
+
+console.log(sugar.getCurrentScript());
 sugar(['SUGAR.animal.Animal', 'SUGAR.util.Date'], function(){
 
     function Dog(){
@@ -14,3 +17,6 @@ sugar(['SUGAR.animal.Animal', 'SUGAR.util.Date'], function(){
     return Dog;
     
 });
+
+
+console.log('dog')
